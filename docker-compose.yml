@@ -1,0 +1,33 @@
+redis:
+    image: redis
+    ports:
+        - "6379:6379"
+mysql:
+    image: mariadb
+    ports:
+        - "3306:3306"
+    environment:
+        MYSQL_ROOT_PASSWORD: admin
+phpfpm:
+    image: shar/php56
+    ports:
+        - "9000:9000"
+    volumes:
+        - ./:/usr/share/nginx/html
+        - ./docker/config/php.ini:/usr/local/etc/php/php.ini
+    links:
+        - mysql
+        - redis
+nginx:
+    image: tutum/nginx
+    ports:
+        - "80:80"
+    links:
+        - phpfpm
+    volumes_from:
+        - phpfpm
+    volumes:
+        - ./docker/config/default.conf:/etc/nginx/sites-available/default
+        - ./docker/config/default.conf:/etc/nginx/sites-enabled/default
+        - ./docker/logs/nginx-error.log:/var/log/nginx/error.log
+        - ./docker/logs/nginx-access.log:/var/log/nginx/access.log
